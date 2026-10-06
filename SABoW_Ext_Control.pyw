@@ -254,6 +254,17 @@ class App(object):
         self.l_details.pack(anchor="w")
         ttk.Button(t, text="Make the selected vehicle playable  >", command=self.to_make).pack(anchor="w", pady=8)
 
+    def install_channel(self):
+        """settings.channel for the current install, cached per install path.
+
+        Cached because update_lock() runs on every tick box and channel() walks data/ - and
+        because the answer cannot change while the folder stays the same.
+        """
+        if getattr(self, "_chan_for", None) != self.install:
+            self._chan_for = self.install
+            self._chan = settings.channel(self.install)
+        return self._chan
+
     def show_install(self):
         if settings.is_sabow(self.install):
             # THE RETAIL / GAMERSGATE BUILD IGNORES ADD-ONS, SILENTLY. It carries game update
@@ -261,7 +272,7 @@ class App(object):
             # so every table this tool ships is dropped with no error and the game simply does
             # not change. Said here, loudly, because the alternative is a user believing the
             # tool is broken. See settings.channel().
-            if settings.channel(self.install) == "retail":
+            if self.install_channel() == "retail":
                 self.l_install.config(
                     text=self.install + "\n"
                     "!  RETAIL / GamersGate build. Update 1.16 ships here as a separate "
@@ -272,7 +283,7 @@ class App(object):
                     "   WORKS: the GTOS maps, the order-of-battle pack, and everything that "
                     "reads. Their tables are new names and do not collide.",
                     foreground=RED)
-            elif settings.channel(self.install) == "unknown":
+            elif self.install_channel() == "unknown":
                 # SILENCE IS NOT AN ANSWER. Until 2026-10-06 anything that was not positively
                 # identified as retail was shown as plain black text, i.e. exactly like a healthy
                 # Steam install - so a machine we could not read was indistinguishable from a
@@ -557,7 +568,30 @@ class App(object):
             self.l_block.config(text="Can't build yet: " + reasons[0],
                                 foreground=AMBER if self.locked or self.busy else RED)
         else:
-            self.l_block.config(text="Ready to build %s." % self.next_version, foreground=GREEN)
+            # THE WARNING HAS TO BE WHERE THE CLICK IS. The retail notice lives on the Vehicles
+            # tab's install line; Build is on this tab. On 2026-10-06 the first outside tester,
+            # working on a copy of his GamersGate folder, got as far as a green
+            # "Ready to build v1." with nothing anywhere on this tab to tell him the game would
+            # throw the result away. One click.
+            #
+            # The button stays ENABLED on retail: building a package to hand to someone on Steam
+            # is a legitimate thing to do, and refusing it would be the tool deciding for the
+            # user. What changes is that it no longer says "ready" and nothing more.
+            ch = self.install_channel()
+            if ch == "retail":
+                self.l_block.config(
+                    text="Ready to build %s - BUT THIS GAME WILL IGNORE IT. Retail / GamersGate "
+                         "build: dev_updates shadows every table the add-on ships, so the game "
+                         "will not change and will not say why. Build it only to hand to someone "
+                         "on the Steam build." % self.next_version, foreground=RED)
+            elif ch == "unknown":
+                self.l_block.config(
+                    text="Ready to build %s - but which build of the game this is could not be "
+                         "identified. If it is the retail / GamersGate one the game will ignore "
+                         "this add-on silently. See the install line on the Vehicles tab."
+                         % self.next_version, foreground=AMBER)
+            else:
+                self.l_block.config(text="Ready to build %s." % self.next_version, foreground=GREEN)
 
     def pending_from_log(self, row):
         """(zip path, unit, platoon ids) for a BUILT row written by this window."""
