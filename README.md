@@ -69,4 +69,5 @@ Steel Armor: Blaze of War and Graviteam Tactics are by **Graviteam**. These tool
 Graviteam's own file formats and their own command-line programs — nothing of theirs is
 redistributed here.
 
-Tools by **murkz**.
+Tools by **murkz**, under the MIT licence - see `LICENSE`. Do what you like with them;
+they come with no warranty of any kind.
