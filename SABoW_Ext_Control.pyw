@@ -114,6 +114,19 @@ if not os.path.isfile(BUILD_LOG):
 # failed, and quietly. It is a setting now, defaulting to a folder beside the tools.
 BACKUPS = settings.get("backups")
 
+
+def _golden_available():
+    """Whether this machine has the frozen proven archive the "Check the tool" button needs.
+
+    Imported lazily and guarded: golden.py pulls in build and recipe, and a machine without the
+    archive must not be stopped by any of that - it simply does not get the button.
+    """
+    try:
+        import golden
+        return golden.available()
+    except Exception:
+        return False
+
 # Readable names for the vehicles we are confident about. Anything else shows
 # the game's own internal name, rather than a guess.
 READABLE = {
@@ -404,7 +417,14 @@ class App(object):
         self.c_vehicle = ttk.Combobox(top, font=TXT, width=34, state="readonly")
         self.c_vehicle.pack(side="left", padx=8)
         ttk.Button(top, text="Work out the recipe", command=self.work_out).pack(side="left")
-        ttk.Button(top, text="Check the tool (must rebuild the proven builds)", command=self.golden_check).pack(side="right")
+        # The developer self-check rebuilds murkz's own frozen PROVEN builds and compares them
+        # byte for byte, so it needs his backups archive. Offering the button to someone who
+        # cannot possibly have that archive only produces a red CHECK STOPPED that reads like a
+        # broken tool - which is exactly what happened to the first outside tester, 2026-10-06.
+        # Shown only where the archive is.
+        if _golden_available():
+            ttk.Button(top, text="Check the tool (must rebuild the proven builds)",
+                       command=self.golden_check).pack(side="right")
 
         self.l_lock = ttk.Label(t, text="", font=MID)
         self.l_lock.grid(row=1, column=0, columnspan=2, sticky="w", pady=(8, 4))

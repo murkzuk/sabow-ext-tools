@@ -19,8 +19,33 @@ sys.path.insert(0, HERE)
 import azcf  # noqa: E402
 import build  # noqa: E402
 import recipe  # noqa: E402
+import settings  # noqa: E402
 
-GOLDEN = r"L:\sabow-ext-backups\v009_PROVEN_T55_ALL_CREW\sabow_ext_v009.zip"
+# WHERE THE PROVEN ARCHIVE IS. These used to be literal paths into this developer's own
+# backups drive. That made the Control's "Check the tool" button something that can only ever
+# work on one machine - Balrog pressed it on 2026-10-06 and got a red
+# "CHECK STOPPED: golden build missing: L:\..." which reads as if the tool is broken, and
+# showed him a drive layout that is none of his business. The paths now come from the backups
+# setting, so this machine behaves exactly as before and anyone else simply does not get the
+# button (see available(), and the Control's make-playable tab).
+BACKUPS = settings.get("backups")
+
+
+def _proven(folder, name):
+    return os.path.join(BACKUPS, folder, name)
+
+
+def available():
+    """True only where the frozen proven archive actually is - i.e. this developer's machine.
+
+    The check REBUILDS known-good builds and compares them byte for byte, so without the
+    archive there is nothing to compare against and the answer is not "fail", it is
+    "not applicable here".
+    """
+    return os.path.isfile(GOLDEN)
+
+
+GOLDEN = _proven("v009_PROVEN_T55_ALL_CREW", "sabow_ext_v009.zip")
 UNIT = "sau_t55"
 CHOICES = dict(recipe.V9_CHOICES, own_sight=False, drop_missing_hide=False)     # v9 used the borrowed TSh-2B-41
 # drop_missing_hide=False everywhere below: every build proven before 2026-09-16 shipped the
@@ -32,26 +57,26 @@ CHOICES = dict(recipe.V9_CHOICES, own_sight=False, drop_missing_hide=False)     
 # Olifant, built with the window's default ticks). Added 2026-09-15, after the
 # weapon rules changed for the Chieftain.
 MORE = [
-    ("saru_olifant", {"drop_missing_hide": False}, r"L:\sabow-ext-backups\v012_PROVEN_SARU_OLIFANT\sabow_ext_v012.zip", 12),
+    ("saru_olifant", {"drop_missing_hide": False}, _proven("v012_PROVEN_SARU_OLIFANT", "sabow_ext_v012.zip"), 12),
     # the Chieftain, proven GOOD with the own-mount weapon rule and the fallback shell.
     # v14 used the borrowed M105D, so its own sight is ticked off here.
-    ("iru_chief_mk5", {"own_sight": False, "drop_missing_hide": False}, r"L:\sabow-ext-backups\v014_PROVEN_IRU_CHIEF_MK5\sabow_ext_v014.zip", 14),
+    ("iru_chief_mk5", {"own_sight": False, "drop_missing_hide": False}, _proven("v014_PROVEN_IRU_CHIEF_MK5", "sabow_ext_v014.zip"), 14),
     # the Chieftain with its own TLS No. 1 sight - the reticle mesh must rebuild too
-    ("iru_chief_mk5", {"drop_missing_hide": False}, r"L:\sabow-ext-backups\v015_PROVEN_IRU_CHIEF_MK5\sabow_ext_v015.zip", 15),
+    ("iru_chief_mk5", {"drop_missing_hide": False}, _proven("v015_PROVEN_IRU_CHIEF_MK5", "sabow_ext_v015.zip"), 15),
     # the T-55 with its own TSh-2B-32P (no zoom record), on v9's ticks
     ("sau_t55", dict(recipe.V9_CHOICES, own_sight_zoom=False, ammo_text=False, drop_missing_hide=False),
-     r"L:\sabow-ext-backups\v021_PROVEN_SAU_T55\sabow_ext_v021.zip", 21),
+     _proven("v021_PROVEN_SAU_T55", "sabow_ext_v021.zip"), 21),
     # ... and with its own 7x zoom reticle (the recipe default)
-    ("sau_t55", dict(recipe.V9_CHOICES, drop_missing_hide=False), r"L:\sabow-ext-backups\v024_PROVEN_SAU_T55\sabow_ext_v024.zip", 24),
+    ("sau_t55", dict(recipe.V9_CHOICES, drop_missing_hide=False), _proven("v024_PROVEN_SAU_T55", "sabow_ext_v024.zip"), 24),
     # the T-55 with the cockpit-ceiling fix (2026-09-16): v24 minus the donor hide rows
     # d_hole_01 / d_hole_02 that the t55 model lacks. Proven on 5-6 missions, no 001.
     ("sau_t55", dict(recipe.V9_CHOICES, ammo_text=False),
-     r"L:\sabow-ext-backups\v027_PROVEN_SAU_T55\sabow_ext_v027.zip", 27),
+     _proven("v027_PROVEN_SAU_T55", "sabow_ext_v027.zip"), 27),
     # the Chieftain with the cockpit-ceiling fix: v15 minus d_hole_01 / d_hole_02. Proven on
     # 13 player Chieftains, 3072 x 3072 m, Susangerd (2026-09-16) - both old failing setups.
-    ("iru_chief_mk5", {}, r"L:\sabow-ext-backups\v029_PROVEN_IRU_CHIEF_MK5\sabow_ext_v029.zip", 29),
+    ("iru_chief_mk5", {}, _proven("v029_PROVEN_IRU_CHIEF_MK5", "sabow_ext_v029.zip"), 29),
     # the Olifant with the cockpit-ceiling fix: v12 minus d_hole_01 / d_hole_02 (murkz, 2026-09-16)
-    ("saru_olifant", {}, r"L:\sabow-ext-backups\v028_PROVEN_SARU_OLIFANT\sabow_ext_v028.zip", 28),
+    ("saru_olifant", {}, _proven("v028_PROVEN_SARU_OLIFANT", "sabow_ext_v028.zip"), 28),
 ]
 
 

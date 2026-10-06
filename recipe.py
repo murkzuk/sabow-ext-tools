@@ -270,7 +270,41 @@ def derive(install, unit, choices=None, game=None):
         scored.append((score, name))
     scored.sort(reverse=True)
     if not scored:
-        raise SystemExit("no playable vehicle with a cockpit to copy from")
+        # SAY WHY. Until 2026-10-06 this raised the bare first line, while the loop above had
+        # already written a sentence per rejected donor into plan.warnings - and then threw them
+        # away, because the exit happens before the plan is ever returned. Balrog hit it on his
+        # own install (Chieftain Mk5) and the window could tell him nothing at all.
+        #
+        # Three ways a candidate disappears, and only two of them leave a warning:
+        #   - the skip at the top of the loop (not crewable, or its cockpit is not in cocpits):
+        #     silent, and it is the one that empties the list completely
+        #   - KNOWN_BAD_DONORS, or the gunner-sight guard: these DO append a warning
+        #   - its model could not be read: silent
+        # So report the counts as well as the warnings; the counts are what distinguish "there was
+        # nothing to consider" from "everything was considered and rejected".
+        considered = sorted(n for n, r in units.items()
+                            if n != unit and r[CREWABLE] and r[COCKPIT] in cockpits)
+        why = [w for w in plan.warnings if w.startswith("not using ")]
+        out = ["no playable vehicle with a cockpit to copy from",
+               "",
+               "%d of %d units in this install are crewable AND have a cockpit the game defines."
+               % (len(considered), len(units))]
+        if considered:
+            out.append("Candidates: " + ", ".join(considered))
+        if why:
+            out.append("")
+            out.append("Every candidate was rejected:")
+            out.extend("  - " + w[len("not using "):] for w in why)
+        elif considered:
+            out.append("")
+            out.append("None of them was rejected for a stated reason, so their models could not be "
+                       "read - the model files the cockpits belong to are missing from this install.")
+        else:
+            out.append("")
+            out.append("There is nothing here to copy from. Either no vehicle in this install is "
+                       "playable yet, or the add-on that makes them playable is not actually in "
+                       "force - on the retail/GamersGate build it is ignored silently.")
+        raise SystemExit(chr(10).join(out))
     donor = choices.get("donor") or scored[0][1]
     drow = units[donor]
     plan.donor_unit, plan.donor_vehicle, plan.donor_cockpit = donor, drow[3], drow[COCKPIT]
