@@ -34,8 +34,22 @@ Then double-click:
   any error
 - `sabow_op_tool.py`
 
-The first time the Control opens it will look for your games through Steam by itself. If it finds
-them, you are ready; if not, press **Choose…** and point it at the folder with `starter.exe` in it.
+The first time the Control opens it will look for your games **through Steam**. If you bought the
+game anywhere else — GamersGate, a disc, GOG — it will not find them, which is not a fault: press
+**Choose…** and point it at the folder with `starter.exe` in it.
+
+### If you have the retail / GamersGate build, read this first
+
+Steel Armor ships through two channels that are **not the same game inside**. The retail build
+carries game update 1.16 as a separate `dev_updates` add-on; the Steam build has it baked in.
+
+**A user add-on cannot override `dev_updates`.** On the retail build, everything this tool installs
+is ignored by the game — silently, with no error anywhere. The build will look as though it worked
+and nothing will change in game.
+
+The Control detects this and says so in red when you pick the folder. Everything that only **reads**
+— the vehicle lists, the playability reports, the operation audit — is still completely correct on
+retail. It is only installing that cannot work.
 
 Your choices are remembered in `%LOCALAPPDATA%\SABoWExt\settings.json`.
 

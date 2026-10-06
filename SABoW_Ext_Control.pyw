@@ -231,7 +231,23 @@ class App(object):
 
     def show_install(self):
         if settings.is_sabow(self.install):
-            self.l_install.config(text=self.install, foreground="black")
+            # THE RETAIL / GAMERSGATE BUILD IGNORES ADD-ONS, SILENTLY. It carries game update
+            # 1.16 as a registered dev_updates add-on, and a user add-on cannot override that -
+            # so every table this tool ships is dropped with no error and the game simply does
+            # not change. Said here, loudly, because the alternative is a user believing the
+            # tool is broken. See settings.channel().
+            if settings.channel(self.install) == "retail":
+                self.l_install.config(
+                    text=self.install + "\n"
+                    "!  This is the RETAIL / GamersGate build (game update 1.16 ships as a "
+                    "separate dev_updates add-on).\n"
+                    "   A user add-on CANNOT override dev_updates, so builds installed here are "
+                    "ignored by the game, silently.\n"
+                    "   The Steam build works. Everything that only READS - the vehicle lists, "
+                    "the reports - is still correct here.",
+                    foreground=RED)
+            else:
+                self.l_install.config(text=self.install, foreground="black")
         else:
             self.l_install.config(text=self.install + "   <- NOT FOUND: press Choose a different install...",
                                   foreground=RED)

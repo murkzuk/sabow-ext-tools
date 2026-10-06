@@ -58,6 +58,42 @@ def is_opstar(folder):
             and os.path.isdir(os.path.join(folder, "data", "k43t")))
 
 
+def channel(folder):
+    """"steam", "retail" or "unknown" - and on retail the add-on will be IGNORED.
+
+    Steel Armor ships through two channels that are not the same game inside. The retail /
+    GamersGate build (assembly 2410) carries game update 1.16 as a registered `dev_updates`
+    add-on; the Steam build (2899) has it baked into the base game.
+
+    A USER ADD-ON CANNOT OVERRIDE dev_updates. Proven by two play-tests with the registry order
+    tried both ways. So on retail every shadowing table this project ships - qbattle,
+    div_units_misc, common_res_mod, cocpits - is silently ignored, with no error anywhere. The
+    build looks like it worked and the game does not change.
+
+    Told apart by two signals that agree on every install here:
+        retail  no steam_api.dll, data/<prefix>/dev_updates present, base tabs 6,488,064
+        steam   steam_api.dll present, no dev_updates,               base tabs 6,815,744
+    """
+    if not folder or not os.path.isdir(folder):
+        return "unknown"
+    steam_api = os.path.isfile(os.path.join(folder, "steam_api.dll"))
+    dev = False
+    data = os.path.join(folder, "data")
+    if os.path.isdir(data):
+        try:
+            for prefix in os.listdir(data):
+                if os.path.isdir(os.path.join(data, prefix, "dev_updates")):
+                    dev = True
+                    break
+        except OSError:
+            pass
+    if dev and not steam_api:
+        return "retail"
+    if steam_api and not dev:
+        return "steam"
+    return "unknown"
+
+
 # ---------------------------------------------------------------- finding the games by themselves
 
 def _steam_libraries():
