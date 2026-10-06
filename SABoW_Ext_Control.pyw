@@ -239,12 +239,13 @@ class App(object):
             if settings.channel(self.install) == "retail":
                 self.l_install.config(
                     text=self.install + "\n"
-                    "!  This is the RETAIL / GamersGate build (game update 1.16 ships as a "
-                    "separate dev_updates add-on).\n"
-                    "   A user add-on CANNOT override dev_updates, so builds installed here are "
-                    "ignored by the game, silently.\n"
-                    "   The Steam build works. Everything that only READS - the vehicle lists, "
-                    "the reports - is still correct here.",
+                    "!  RETAIL / GamersGate build. Update 1.16 ships here as a separate "
+                    "dev_updates add-on, and a user add-on cannot override it.\n"
+                    "   BLOCKED: the playable-vehicle add-on. It ships cocpits, common_res, "
+                    "common_res_mod, div_units_misc and qbattle - all five are in dev_updates, "
+                    "so all five are ignored, silently.\n"
+                    "   WORKS: the GTOS maps, the order-of-battle pack, and everything that "
+                    "reads. Their tables are new names and do not collide.",
                     foreground=RED)
             else:
                 self.l_install.config(text=self.install, foreground="black")

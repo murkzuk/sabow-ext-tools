@@ -43,13 +43,19 @@ game anywhere else — GamersGate, a disc, GOG — it will not find them, which 
 Steel Armor ships through two channels that are **not the same game inside**. The retail build
 carries game update 1.16 as a separate `dev_updates` add-on; the Steam build has it baked in.
 
-**A user add-on cannot override `dev_updates`.** On the retail build, everything this tool installs
-is ignored by the game — silently, with no error anywhere. The build will look as though it worked
-and nothing will change in game.
+**A user add-on cannot override `dev_updates`** — so anything the tool installs that *shadows* a
+table already in `dev_updates` is ignored, silently, with no error anywhere.
 
-The Control detects this and says so in red when you pick the folder. Everything that only **reads**
-— the vehicle lists, the playability reports, the operation audit — is still completely correct on
-retail. It is only installing that cannot work.
+Measured, rather than assumed:
+
+| | on retail |
+|---|---|
+| **Playable vehicles** (the WW2 add-on) | **blocked.** It ships `cocpits`, `common_res`, `common_res_mod`, `div_units_misc` and `qbattle` — all five are in `dev_updates`, so all five are dropped |
+| **GTOS maps** | **work.** Their tables (`builds`, `builds_cap`, `flora_win`, `season_ua_snow`) are new names and collide with nothing |
+| **Order-of-battle pack** | **works** — no collision |
+| **Everything that reads** — vehicle lists, playability reports, operation audits | **correct** |
+
+The Control detects the build and says which of these applies when you pick the folder.
 
 Your choices are remembered in `%LOCALAPPDATA%\SABoWExt\settings.json`.
 
