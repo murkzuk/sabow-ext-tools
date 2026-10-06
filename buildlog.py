@@ -19,8 +19,17 @@ ROW = re.compile(r"^\|\s*(?P<when>[^|]*?)\s*\|\s*(?P<what>[^|]*?)\s*\|\s*(?P<ver
 
 
 def rows(path):
-    """Every event row of the log, oldest first."""
+    """Every event row of the log, oldest first. A log that does not exist yet has no rows.
+
+    Returns [] rather than raising. Release test 2026-10-06: the Control reads the log while
+    it is still drawing its tabs, so on any machine where BUILD_LOG.md was not beside the
+    tools - i.e. every machine but the development one - it died at startup with
+    FileNotFoundError and showed the error box instead of the window. "No builds yet" is the
+    correct answer for a fresh install, not an error.
+    """
     out = []
+    if not os.path.isfile(path):
+        return out
     with open(path, encoding="utf-8") as f:
         for line in f:
             m = ROW.match(line.rstrip("\r\n"))
@@ -111,8 +120,27 @@ def _clean(text):
 
 def append(path, what, version, notes, when=None):
     when = when or datetime.date.today().isoformat()
-    with open(path, "rb") as f:
-        data = f.read()
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except FileNotFoundError:
+        # The first row on a fresh install. Start the table so the file the user ends up
+        # with reads like this project's own and rows() can parse it back. Same release
+        # test as rows() above. Built from a list rather than written with escapes so the
+        # header cannot drift from what the parser above expects.
+        folder = os.path.dirname(path)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
+        data = chr(10).join([
+            "# SABoW Ext - what happened",
+            "",
+            "One line per event, newest at the bottom. GOOD and BAD lines are what you saw",
+            "in the game; the rest are what was done.",
+            "",
+            "| when | what | version | notes |",
+            "|---|---|---|---|",
+            "",
+        ]).encode("utf-8")
     nl = b"\r\n" if b"\r\n" in data else b"\n"
     line = "| %s | %s | %s | %s |" % (when, what, version, _clean(notes))
     if data and not data.endswith(nl):

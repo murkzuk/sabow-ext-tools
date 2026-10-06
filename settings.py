@@ -37,6 +37,16 @@ def _config_dir():
 
 FILE = os.path.join(_config_dir(), "settings.json")
 
+
+def config_dir():
+    """The per-user folder the tools may write to, whatever the tools were unpacked into.
+
+    Public since 2026-10-06 so the Control can put BUILD_LOG.md somewhere writable on a
+    released copy. A release unpacked under Program Files is not user-writable, and the
+    build record is not something anyone should need administrator rights to keep.
+    """
+    return os.path.dirname(FILE)
+
 DEFAULTS = {"live": "", "sandbox": "", "opstar": "", "backups": ""}
 
 

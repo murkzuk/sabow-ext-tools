@@ -96,7 +96,19 @@ except Exception:
                    "It needs them in: " + TOOL_DIR)
 
 REPO = os.path.dirname(HERE)
+# The build record. In this project it is the repo's own BUILD_LOG.md, one level above the
+# tool folder, and that stays the file used whenever it is there.
+#
+# On a RELEASED copy it is not there: the tools are unpacked into some folder and the parent
+# is the user's Downloads. Until 2026-10-06 that was fatal - the window reads the log while
+# it is still building its tabs, so the Control died at startup with FileNotFoundError on
+# every machine but this one and showed the error box instead of a window. Found by
+# double-clicking it, which no amount of import-checking had done.
+# Two halves to the fix: buildlog.rows() now treats a missing log as "no builds yet", and the
+# path falls back to the per-user settings folder, which is writable wherever the tools sit.
 BUILD_LOG = os.path.join(REPO, "BUILD_LOG.md")
+if not os.path.isfile(BUILD_LOG):
+    BUILD_LOG = os.path.join(settings.config_dir(), "BUILD_LOG.md")
 # Where frozen, proven packages are kept. It used to be the literal L:\sabow-ext-backups
 # (release audit H3) - on a machine with no L: that made the SAFETY NET the thing that
 # failed, and quietly. It is a setting now, defaulting to a folder beside the tools.

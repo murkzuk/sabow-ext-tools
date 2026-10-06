@@ -2,7 +2,14 @@
 # Decode logic is read_mesh() from K:\DeepseekSABoW\stubify.py (notes/66-67),
 # pointed at the clean L: install instead of G:.
 import struct, sys, glob, os
-sys.path.insert(0, r"K:\SABoW_Ext\tool")
+# The tool folder is wherever THIS file is. It used to be the literal path to the
+# development repo (release audit B1, missed because the sweep for path literals was a
+# regex and this one is a raw string). On a machine without that drive the entry is simply
+# skipped, so it broke nothing for a user - but on the development machine it was inserted
+# at position 0, AHEAD of the released package's own folder, so a released copy silently
+# imported the development repo's modules and every test of the package was really a test
+# of the repo. Found 2026-10-06.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import azcf
 import settings
 
