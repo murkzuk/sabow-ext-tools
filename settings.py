@@ -83,6 +83,18 @@ def channel(folder):
     Told apart by two signals that agree on every install here:
         retail  no steam_api.dll, data/<prefix>/dev_updates present, base tabs 6,488,064
         steam   steam_api.dll present, no dev_updates,               base tabs 6,815,744
+
+    WHAT ACTUALLY BLOCKS AN ADD-ON IS dev_updates, NOT WHICH SHOP SOLD THE GAME, and until
+    2026-10-06 this asked for the shop. It required dev_updates present AND steam_api.dll absent
+    before it would say "retail". The first outside tester worked on a copy of his GamersGate
+    folder that had BOTH, so this answered "unknown" - and the Control only warned on "retail", so
+    he got silence. Silence reads as "all fine". He was one click from building an add-on the game
+    would have ignored without a word, and from concluding the tool was broken.
+
+    dev_updates present is now sufficient on its own, because that is the thing that does the
+    shadowing. steam_api.dll is only consulted to name the channel when there is no dev_updates at
+    all. Verified unchanged on the three installs here: the retail copy still reads retail, and
+    both Steam installs still read steam.
     """
     if not folder or not os.path.isdir(folder):
         return "unknown"
@@ -97,9 +109,9 @@ def channel(folder):
                     break
         except OSError:
             pass
-    if dev and not steam_api:
-        return "retail"
-    if steam_api and not dev:
+    if dev:
+        return "retail"          # whatever the shop was, the add-on is shadowed - say so
+    if steam_api:
         return "steam"
     return "unknown"
 

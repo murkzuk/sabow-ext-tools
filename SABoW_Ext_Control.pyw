@@ -272,6 +272,20 @@ class App(object):
                     "   WORKS: the GTOS maps, the order-of-battle pack, and everything that "
                     "reads. Their tables are new names and do not collide.",
                     foreground=RED)
+            elif settings.channel(self.install) == "unknown":
+                # SILENCE IS NOT AN ANSWER. Until 2026-10-06 anything that was not positively
+                # identified as retail was shown as plain black text, i.e. exactly like a healthy
+                # Steam install - so a machine we could not read was indistinguishable from a
+                # machine that is fine. The failure being guarded against is INVISIBLE in game, so
+                # "I could not tell" has to be said out loud.
+                self.l_install.config(
+                    text=self.install + "\n"
+                    "?  Could not tell which build of the game this is. If it is the retail / "
+                    "GamersGate one, the playable-vehicle add-on will be ignored silently and the "
+                    "game will not change. The maps and the order of battle work either way.\n"
+                    "   Check for a data\\<something>\\dev_updates folder: if one is there, this is "
+                    "the retail build.",
+                    foreground=RED)
             else:
                 self.l_install.config(text=self.install, foreground="black")
         else:
